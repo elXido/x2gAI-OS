@@ -1,4 +1,4 @@
-# x2gAI-OS_research
+# x2g Agentic - OS
 
 ## Project Goal: To build a Local website for my agentic OS
 
