@@ -1,0 +1,18 @@
+{
+  "templateType": "web-app",
+  "projectDefaults": {
+    "framework": "angular",
+    "ui": "devextreme",
+    "strictTypescript": true
+  },
+  "files": [
+    {
+      "path": "README.md",
+      "content": "# ${moduleLabel}\n\nScaffolded ${createdAt} as module `${moduleId}` by the x2g daemon.\n"
+    },
+    {
+      "path": "src/.gitkeep",
+      "content": ""
+    }
+  ]
+}

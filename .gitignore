@@ -1,0 +1,8 @@
+node_modules/
+bin/
+obj/
+X2G_Ventures/x2gAI-OS/build/
+X2G_Ventures/x2gAI-OS/frontend/dist/
+X2G_infrastructure/logs/
+X2G_infrastructure/config/discovered_tree.json
+X2G_infrastructure/config/token_ledger.json

@@ -1,0 +1,86 @@
+{
+  "$schema": "../../schemas/pipeline.schema.json",
+  "id": "triallens",
+  "label": "TrialLens Clinical Research Pipeline",
+  "root": "X2G_Ventures/TrialLens",
+  "entryState": "INTAKE_DATASET",
+  "terminalStates": ["REPORT"],
+  "states": [
+    {
+      "name": "INTAKE_DATASET",
+      "skills": ["ingest_dataset_manifest"],
+      "bindings": {
+        "manifestSchema": "X2G_infrastructure/schemas/triallens_dataset.schema.json"
+      }
+    },
+    {
+      "name": "NORMALIZE_RECORDS",
+      "skills": ["alphanumeric_safe_normalize", "validate_mrn_string_type"],
+      "bindings": {
+        "identifierSanitizePattern": "[^A-Za-z0-9._-]",
+        "sanitizeMode": "strip_or_escape_before_processing",
+        "logPolicy": "never_emit_raw_identifiers",
+        "mrnGuard": "MedicalRecordNumber.create"
+      }
+    },
+    {
+      "name": "MAP_PROTOCOL",
+      "skills": ["apply_protocol_rules"],
+      "bindings": {
+        "rulesPath": "X2G_Ventures/TrialLens/protocol_rules.json"
+      }
+    },
+    {
+      "name": "INDEX_MEMORY",
+      "skills": ["notebooklm_index", "write_vault_summary"],
+      "bindings": {
+        "literatureRouting": "notebooklm",
+        "fullTextIntoModelContext": false,
+        "vaultWriteScope": "_x2g/",
+        "outputFormat": "json"
+      }
+    },
+    {
+      "name": "REPORT",
+      "skills": ["emit_report"],
+      "bindings": {
+        "auditTrail": "X2G_infrastructure/logs/audit_trail.json"
+      }
+    }
+  ],
+  "transitions": [
+    { "from": "INTAKE_DATASET", "to": "NORMALIZE_RECORDS", "guard": "dataset_manifest_valid" },
+    { "from": "NORMALIZE_RECORDS", "to": "MAP_PROTOCOL", "guard": "all_mrns_string_validated" },
+    { "from": "MAP_PROTOCOL", "to": "INDEX_MEMORY", "guard": "protocol_rules_applied" },
+    { "from": "INDEX_MEMORY", "to": "REPORT", "guard": "summaries_written_to_x2g_vault" }
+  ],
+  "identifierPolicy": {
+    "mrnType": "string",
+    "mrnPattern": "^[A-Za-z0-9._-]{1,64}$",
+    "numericCoercion": "hard_fault",
+    "forbiddenRuntimeTypes": ["int", "int32", "int64", "number", "float", "decimal"],
+    "preserveLeadingZeros": true,
+    "rawIdentifiersInLogs": "forbidden",
+    "redactionFormat": "****{last4}"
+  },
+  "recordSchemas": {
+    "clinical_record": {
+      "mrn": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9._-]{1,64}$",
+        "coercion": "forbidden",
+        "forbiddenTypes": ["int", "int32", "int64", "number", "float", "decimal"],
+        "preserveLeadingZeros": true
+      },
+      "dataset_id": "string",
+      "protocol_id": "string",
+      "record_hash": "string",
+      "intake_timestamp": "ISO8601",
+      "pipeline_state": "string"
+    }
+  },
+  "audit": {
+    "trail": "X2G_infrastructure/logs/audit_trail.json",
+    "mode": "append-only"
+  }
+}

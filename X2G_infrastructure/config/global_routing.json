@@ -1,0 +1,15 @@
+{
+  "httpPort": 4280,
+  "wsPort": 4287,
+  "discoveryHeartbeatMs": 60000,
+  "globalMonthlyCapUsd": 50.0,
+  "providerRatesPerMillionTokensUsd": {
+    "OllamaLocal": 0.0,
+    "AnthropicClaude": 15.0,
+    "OpenAI": 10.0,
+    "Gemini": 7.0
+  },
+  "ollamaEndpoint": "http://localhost:11434",
+  "ollamaDefaultModel": "llama3:8b-instruct-q8_0",
+  "obsidianVaults": []
+}

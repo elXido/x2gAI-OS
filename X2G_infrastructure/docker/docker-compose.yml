@@ -1,0 +1,32 @@
+# Run from this directory: docker compose up --build
+# Compose YAML is a Section 5 canonical target; the JSON-only law (1.6)
+# applies to daemon-parsed machine state, which this is not.
+services:
+  x2g-command-center:
+    build:
+      context: ../..
+      dockerfile: X2G_infrastructure/docker/Dockerfile
+      # Switch to target: runtime once the Angular workspace exists.
+      target: runtime-daemon-only
+    # Run as the image's non-root node user (uid 1000) so files written to the
+    # bind mounts (tickets, ledgers, logs) stay owned by the host user.
+    user: node
+    environment:
+      HOME: /home/node
+    ports:
+      - "4280:4280"
+      - "4287:4287"
+    volumes:
+      # Append-only ledgers and discovery snapshots must survive container
+      # replacement (4.4); bind-mount them back into the repo.
+      - ../logs:/x2g/X2G_infrastructure/logs
+      - ../config:/x2g/X2G_infrastructure/config
+      # Domain pipeline roots the watchers observe (X-TMS inbound/tickets etc.).
+      - ../../X2G_Ventures/X-TMS:/x2g/X2G_Ventures/X-TMS
+      - ../../X2G_Ventures/Web_Applications:/x2g/X2G_Ventures/Web_Applications
+    extra_hosts:
+      # Reach the host's Ollama (RTX 5070 Ti) from inside the container; set
+      # ollamaEndpoint to http://host.docker.internal:11434 in global_routing.json
+      # for containerized deployments.
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

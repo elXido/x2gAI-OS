@@ -1,0 +1,174 @@
+================================================================================
+X2G AGENTIC OS - ARCHITECTURAL SPECIFICATION & SYSTEM DESIGN DOCUMENT
+================================================================================
+Status: DEEP RESEARCH REVISION (STEP 1 - DYNAMIC MODULE EXPANSION)
+Target Engine: Fable 5 (F# to JS/ES6 compilation)
+Target Runtime: Headless Node.js Execution Daemon (Cross-platform: Pop!_OS / Windows 11)
+Frontend Stack: Angular Framework with DevExtreme UI Components
+Primary Host Rig: Local Workstation (NVIDIA RTX 5070 Ti, 32GB RAM, Pop!_OS)
+--------------------------------------------------------------------------------
+
+1. REVISED PROJECT GOAL & CORE PARADIGM
+--------------------------------------------------------------------------------
+The primary objective of x2gAI-OS is to deploy a high-performance, deterministic,
+local-first agentic operating system that manages workflows, schedules routines,
+and runs pipelines across your entire development, enterprise, research, and 
+web application portfolio.[cite: 1, 2]
+
+To optimize the developer experience, performance footprint, and enterprise layout 
+flexibility, the architectural interface paradigm is shifted to a dual-plane UI:
+
+* PRIMARY INTERFACE: An enterprise-grade Web Application Dashboard & Command Center.
+  This web panel serves as the live operational deck, running natively inside a
+  Docker container on the host machine. The front-end is built using Angular, 
+  leveraging DevExtreme controls to deliver high-performance grids, rich multi-tab 
+  layouts, complex menus, and analytical charts.
+* SECONDARY INTERFACE: Multi-Vault Obsidian Architecture.
+  Your existing Obsidian vaults serve as an externalized reactive database, long-term
+  semantic memory cache ("2nd Brain"), and secondary control configuration plane.[cite: 1, 2]
+  The daemon monitors updates through file-system tracking.[cite: 1, 2]
+
+All agent orchestrations, loop routing, and state definitions are declared using
+strict JSON configuration schemas, discarding brittle YAML or markdown frontmatter
+for state-machine tracking.[cite: 1]
+
+2. DETAILED STRUCTURAL COMPONENT REQUIREMENT
+--------------------------------------------------------------------------------
+[1] Local Ollama Pipeline
+    * Primary local execution point using quantized weights on local hardware.[cite: 1]
+    * Communicates via local REST endpoints on http://localhost:11434.[cite: 1]
+    * Fallback mechanics shift workloads to commercial APIs (Anthropic Claude,
+      OpenAI, Gemini) only when required context lengths exceed local VRAM capabilities 
+      or during verified local latency bottlenecks.[cite: 1]
+
+[2] Web Application & Docker Ecosystem
+    * Containerized deployment hosting the main user dashboard, live agent execution logs,
+      and centralized telemetry graphs.[cite: 1]
+    * Built out via an Angular Single Page Application (SPA) serving a clean, lightweight, 
+      modular component layout populated with rich DevExtreme controls.
+    * Exposes an internal WebSocket connection to the Node.js daemon for instantaneous,
+      zero-polling telemetry streaming and dynamic file-tree discovery.[cite: 1]
+
+[3] Secondary Interface (Obsidian Multi-Vault Integration)
+    * The system interfaces natively with your existing, pre-configured Obsidian Vaults.[cite: 1]
+    * The Fable daemon uses asynchronous file system trackers to safely read/write files 
+      across isolated vaults without corrupting local markdown histories or link graphs.[cite: 1]
+
+[4] DevExtreme Command Center & Multi-Module Dashboard
+    * Features a feature-rich visual hub showcasing multi-view layouts, expandable left 
+      side-navigation menus, data grids, and task boards.
+    * Modules are fully dynamic: users can instantly load up separate panels for Web Apps,
+      Digital Pathology workloads, ML training logs, and Logistics tickets.
+    * Includes an active Command Center terminal component allowing the manual input of
+      direct text syscalls, routine injections, or manual overrides.[cite: 1]
+
+[5] Paperclip-Style State & Token Governance
+    * Enforces absolute execution determinism. Dynamic loops or unconstrained autonomous
+      paths are prohibited; state modifications use definitive F# Discriminated Unions.[cite: 1]
+    * Every transaction is passed through an Interceptor Pipeline that evaluates a local
+      append-only token ledger.[cite: 1] If an agent hits a preset commercial budget ceiling, the loop
+      aborts safely and transfers context flags back to the local Ollama instance.[cite: 1]
+
+[6] Pure JSON-Based Configuration Architecture
+    * System settings, agent profile structures, skills lists, and pipeline dependencies
+      are structured entirely using rigid JSON schemas.[cite: 1]
+    * This guarantees rapid native parsing by Node.js, simple schema validation via standard tools,
+      and seamless serialization with the Fable 5 data model.[cite: 1]
+
+3. DYNAMIC ENVIRONMENT UNDERSTANDING & AUTONOMOUS TREE DISCOVERY
+--------------------------------------------------------------------------------
+The background Fable daemon executes automated structural scanning routines. It does 
+not rely on statically defined project structures; it proactively discovers your ecosystem by:
+* Mapping Local Trees: Recursively walking through `~/.claude`, `X2G_infrastructure`, 
+  and `X2GVentures` to read directory topologies.
+* Context Verification: Locating and indexing individual project `.claude.md` or 
+  `.claude` files inside every sub-folder to glean localized boundaries, rules, and scopes.
+* Dynamic Scaffolding & On-the-Fly Generation: Acting as a meta-generator. From within
+  the DevExtreme dashboard interface, you can issue commands to quickly spin up brand 
+  new modular sub-projects, micro-apps, or template new websites. The system automatically
+  injects the new JSON schema manifests, populates standard configurations, writes a fresh 
+  localized `.claude.md` file, and appends a new module item to your Angular side-navigation menu.
+
+4. REVISED ENVIRONMENT TARGETS & RECURSIVE SYSTEM TREE
+--------------------------------------------------------------------------------
+~/.claude/
+├── config.json               # Environment defaults and global API endpoint definitions[cite: 1]
+└── active_session.json       # Live terminal/agent state mapping and active PID tokens[cite: 1]
+
+X2G_infrastructure/
+├── docker/
+│   ├── docker-compose.yml    # Orchestration configuration for Angular Web App and Node daemon[cite: 1]
+│   └── Dockerfile            # Multi-stage build targeting the Angular engine and Node.js[cite: 1]
+├── config/
+│   ├── global_routing.json   # Global state machine paths and operational boundaries[cite: 1]
+│   └── token_ledger.json     # Append-only transaction budget history[cite: 1]
+└── logs/
+    └── audit_trail.json      # Immutable transactional history of inputs, outputs, and tool calls[cite: 1]
+
+X2G_Ventures/
+├── X-TMS/                    # Transportation & Logistics Hub (Hotshot routing data)[cite: 1]
+│   ├── .claude.md            # Local system instructions for hotshot trucking context
+│   ├── configuration.json    # Trucking operations specific endpoints, Twilio A2P profiles[cite: 1]
+│   └── tickets/              # JSON-formatted task sheets (e.g., XTMS-101)[cite: 1]
+├── TrialLens/                # Oncology Research & Clinical Trial Protocol Optimization[cite: 1]
+│   ├── .claude.md            # Local instructions for oncology research data rules
+│   └── protocol_rules.json   # Clinical mapping vectors and parsing data patterns[cite: 1]
+├── Digital_Pathology/        # Digital Pathology Intelligence Module
+│   ├── .claude.md            # Local rules for handling whole slide image (WSI) metadata
+│   └── processing_jobs.json  # Pipeline configurations for vision workflows
+├── ML_Projects/              # Machine Learning Training & Weights Orchestration
+│   ├── .claude.md            # System limits for training hyperparameters and local execution
+│   └── models_registry.json  # Manifest tracking local model runs, paths, and evaluations
+├── Web_Applications/         # Miscellaneous Internal/External Web Sites & Apps
+│   ├── site-a-dashboard/     # Individual web application workspace
+│   │   ├── .claude.md        # Local architectural boundaries for this specific app
+│   │   └── project.json      # App metadata
+│   └── site-b-landing/
+└── x2gAI-OS/                 # The compilation and build framework core[cite: 1]
+    ├── frontend/             # Angular client app with DevExtreme dependencies
+    │   ├── src/
+    │   ├── angular.json
+    │   └── package.json      # Angular UI dependencies (@dx/devextreme-angular)
+    ├── src/
+    │   ├── App.fsproj        # Fable project layout manifest[cite: 1]
+    │   ├── Domain.fs         # Strongly typed state graphs, Discriminated Unions, JSON maps[cite: 1]
+    │   └── Daemon.fs         # Chokidar loops, local tree walkers, tree watchers, Web UI routers[cite: 1]
+    └── package.json          # Node dependencies, Chokidar bindings, and build scripts[cite: 1]
+
+5. PORTFOLIO & PROJECT ALIGNMENT MATRIX
+--------------------------------------------------------------------------------
+The x2gAI-OS core engine is natively adapted to automate your highest frequency
+workflows and production domains:
+
+* X-TMS (Transportation Management System) Automation:
+  The daemon reads inbound freight alerts, parses shipping itineraries, and processes
+  rate confirmation paperwork.[cite: 1] It interfaces with external infrastructure via type-safe
+  wrappers, managing dispatch alerts using approved Twilio 10DLC routes.[cite: 1]
+  
+* TrialLens & Clinical Research Workflows:
+  Integrates complex medical informatics parsing schemas.[cite: 1] It automates semantic processing
+  of clinical test data, study protocol layouts, and research publications, using 
+  alphanumeric-safe medical records parsing parameters.[cite: 1]
+
+* Digital Pathology Workflows:
+  Manages pipeline state tracking for microservice imaging layers, analyzing slide metadata,
+  and orchestrating analytical steps deterministically.
+
+* ML Pipeline & Infrastructure Monitoring:
+  Exposes model validation metrics, checkpoints, and parameter states directly to 
+  DevExtreme charts and grids on the primary dashboard interface.
+
+* Web Application Scaffold-on-Demand:
+  Monitors existing web codebases via local folder scanners. Provides an interactive UI 
+  form to generate new website directories, configure tracking structures, and append 
+  functional endpoints seamlessly.
+
+* Personal Knowledge Graph Optimization:
+  Operates on your existing Obsidian vaults to structure raw text caches, process dev logs, 
+  and generate structured, high-efficiency system tracking summaries without creating 
+  redundant file trees or processing loops.[cite: 1]
+
+================================================================================
+END OF SPECIFICATION DOCUMENT
+================================================================================
+

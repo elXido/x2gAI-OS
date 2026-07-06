@@ -1,0 +1,115 @@
+{
+  "$schema": "../../schemas/pipeline.schema.json",
+  "id": "xtms",
+  "label": "X-TMS Logistics Pipeline",
+  "root": "X2G_Ventures/X-TMS",
+  "entryState": "INGEST_ALERT",
+  "terminalStates": ["ARCHIVE"],
+  "states": [
+    {
+      "name": "INGEST_ALERT",
+      "skills": ["watch_inbound_freight_alerts", "create_freight_ticket"],
+      "bindings": {
+        "watchPath": "X2G_Ventures/X-TMS/inbound/",
+        "watcher": "chokidar",
+        "awaitWriteFinish": true,
+        "debounceMs": 250,
+        "ticketOutputPath": "X2G_Ventures/X-TMS/tickets/",
+        "ticketSchema": "X2G_infrastructure/schemas/ticket.schema.json",
+        "ticketIdPrefix": "XTMS-"
+      }
+    },
+    {
+      "name": "PARSE_RATECON",
+      "skills": ["parse_ratecon_document"],
+      "bindings": {
+        "preferredProvider": "OllamaLocal",
+        "localEndpoint": "http://localhost:11434",
+        "escalationPolicy": "section_4.3_budget_gated",
+        "extractFields": [
+          "ratecon_origin",
+          "ratecon_destination",
+          "ratecon_rate_usd",
+          "freight_weight_lbs",
+          "ratecon_pickup_window",
+          "ratecon_delivery_window"
+        ]
+      }
+    },
+    {
+      "name": "VALIDATE_FREIGHT",
+      "skills": ["validate_freight_ticket"],
+      "bindings": {
+        "requiredFields": [
+          "freight_id",
+          "ratecon_id",
+          "ratecon_origin",
+          "ratecon_destination",
+          "ratecon_rate_usd",
+          "freight_weight_lbs"
+        ]
+      }
+    },
+    {
+      "name": "DISPATCH_SMS",
+      "skills": ["twilio_10dlc_dispatch"],
+      "bindings": {
+        "routesConfig": "X2G_Ventures/X-TMS/configuration.json",
+        "channel": "twilio_10dlc_a2p",
+        "wrapper": "fsharp_typesafe_twilio_client",
+        "precondition": "freight_validated",
+        "auditPerDispatch": true
+      }
+    },
+    {
+      "name": "ARCHIVE",
+      "skills": ["archive_freight_ticket"],
+      "bindings": {
+        "auditTrail": "X2G_infrastructure/logs/audit_trail.json"
+      }
+    }
+  ],
+  "transitions": [
+    { "from": "INGEST_ALERT", "to": "PARSE_RATECON", "guard": "alert_ticket_created" },
+    { "from": "PARSE_RATECON", "to": "VALIDATE_FREIGHT", "guard": "ratecon_fields_extracted" },
+    { "from": "VALIDATE_FREIGHT", "to": "DISPATCH_SMS", "guard": "freight_validated" },
+    { "from": "VALIDATE_FREIGHT", "to": "ARCHIVE", "guard": "freight_rejected" },
+    { "from": "DISPATCH_SMS", "to": "ARCHIVE", "guard": "sms_dispatch_audited" }
+  ],
+  "schemaIntegrity": {
+    "requiredTerminology": ["freight", "ratecon"],
+    "forbiddenTerminology": ["load", "rate_confirmation", "carrier_doc"],
+    "enforcement": "reject_document_and_append_audit_record"
+  },
+  "recordSchemas": {
+    "freight_alert": {
+      "freight_id": "string",
+      "freight_source": "string",
+      "freight_received_at": "ISO8601",
+      "ratecon_document_path": "string"
+    },
+    "ratecon": {
+      "ratecon_id": "string",
+      "freight_id": "string",
+      "ratecon_origin": "string",
+      "ratecon_destination": "string",
+      "ratecon_rate_usd": "decimal",
+      "freight_weight_lbs": "decimal",
+      "ratecon_pickup_window": "string",
+      "ratecon_delivery_window": "string",
+      "ratecon_carrier_mc": "string"
+    },
+    "freight_ticket": {
+      "ticket_id": "string",
+      "freight_id": "string",
+      "ratecon": "ratecon",
+      "pipeline_state": "string",
+      "sms_dispatched": "boolean",
+      "audit_ref": "string"
+    }
+  },
+  "audit": {
+    "trail": "X2G_infrastructure/logs/audit_trail.json",
+    "mode": "append-only"
+  }
+}

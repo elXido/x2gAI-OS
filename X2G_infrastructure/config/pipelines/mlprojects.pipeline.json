@@ -1,0 +1,52 @@
+{
+  "$schema": "../../schemas/pipeline.schema.json",
+  "id": "mlprojects",
+  "label": "ML Projects Run Monitoring Pipeline",
+  "root": "X2G_Ventures/ML_Projects",
+  "entryState": "REGISTER_RUN",
+  "terminalStates": ["EMIT_CHARTS"],
+  "states": [
+    {
+      "name": "REGISTER_RUN",
+      "skills": ["register_model_run"],
+      "bindings": {
+        "registry": "X2G_Ventures/ML_Projects/models_registry.json",
+        "registeredFields": ["path", "hyperparameters", "checkpointRefs", "evaluations"]
+      }
+    },
+    {
+      "name": "MONITOR",
+      "skills": ["stream_run_metrics"],
+      "bindings": {
+        "channel": "websocket",
+        "polling": false,
+        "frontendTargets": ["dxChart", "dxDataGrid"]
+      }
+    },
+    {
+      "name": "COLLECT_METRICS",
+      "skills": ["aggregate_run_metrics"],
+      "bindings": {
+        "metrics": ["loss", "accuracy", "latency"],
+        "granularity": "per_checkpoint"
+      }
+    },
+    {
+      "name": "EMIT_CHARTS",
+      "skills": ["emit_chart_series"],
+      "bindings": {
+        "target": "command_center_analytics_tab",
+        "chartTypes": ["dxChart", "dxPieChart"]
+      }
+    }
+  ],
+  "transitions": [
+    { "from": "REGISTER_RUN", "to": "MONITOR", "guard": "run_registered_in_models_registry" },
+    { "from": "MONITOR", "to": "COLLECT_METRICS", "guard": "run_completed" },
+    { "from": "COLLECT_METRICS", "to": "EMIT_CHARTS", "guard": "metrics_aggregated" }
+  ],
+  "audit": {
+    "trail": "X2G_infrastructure/logs/audit_trail.json",
+    "mode": "append-only"
+  }
+}

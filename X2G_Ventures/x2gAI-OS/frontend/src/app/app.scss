@@ -1,0 +1,38 @@
+.shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.side-nav {
+  width: 280px;
+  flex-shrink: 0;
+  border-right: 1px solid #e0e0e0;
+  padding: 12px;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+
+  h1 {
+    font-size: 16px;
+    margin: 0;
+  }
+}
+
+.status {
+  font-size: 12px;
+  color: #b00020;
+
+  &.online {
+    color: #1b7f3b;
+  }
+}
+
+.content {
+  flex: 1;
+  padding: 16px;
+  min-width: 0;
+}

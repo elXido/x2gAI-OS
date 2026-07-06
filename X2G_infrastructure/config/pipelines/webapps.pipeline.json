@@ -1,0 +1,48 @@
+{
+  "$schema": "../../schemas/pipeline.schema.json",
+  "id": "webapps",
+  "label": "Web Applications Scaffold-on-Demand Pipeline",
+  "root": "X2G_Ventures/Web_Applications",
+  "entryState": "MONITOR",
+  "terminalStates": [],
+  "states": [
+    {
+      "name": "MONITOR",
+      "skills": ["watch_web_codebases"],
+      "bindings": {
+        "watchPath": "X2G_Ventures/Web_Applications/",
+        "watcher": "chokidar",
+        "awaitWriteFinish": true,
+        "debounceMs": 250
+      }
+    },
+    {
+      "name": "SCAFFOLD_MODULE",
+      "skills": ["scaffold_module"],
+      "bindings": {
+        "requestSchema": "X2G_infrastructure/schemas/scaffold_request.schema.json",
+        "templatesDir": "X2G_infrastructure/templates/",
+        "defaultParent": "X2G_Ventures/Web_Applications",
+        "overwritePolicy": "refuse_existing_directory"
+      }
+    },
+    {
+      "name": "REGISTER_MODULE",
+      "skills": ["emit_menu_delta", "append_audit"],
+      "bindings": {
+        "menuChannel": "websocket",
+        "seedsLocalizedContext": true,
+        "auditTrail": "X2G_infrastructure/logs/audit_trail.json"
+      }
+    }
+  ],
+  "transitions": [
+    { "from": "MONITOR", "to": "SCAFFOLD_MODULE", "guard": "scaffold_request_validated" },
+    { "from": "SCAFFOLD_MODULE", "to": "REGISTER_MODULE", "guard": "module_created" },
+    { "from": "REGISTER_MODULE", "to": "MONITOR", "guard": "menu_delta_emitted" }
+  ],
+  "audit": {
+    "trail": "X2G_infrastructure/logs/audit_trail.json",
+    "mode": "append-only"
+  }
+}

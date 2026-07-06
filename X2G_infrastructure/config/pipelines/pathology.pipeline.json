@@ -1,0 +1,90 @@
+{
+  "$schema": "../../schemas/pipeline.schema.json",
+  "id": "pathology",
+  "label": "Digital Pathology WSI Pipeline",
+  "root": "X2G_Ventures/Digital_Pathology",
+  "entryState": "REGISTER_WSI",
+  "terminalStates": [
+    "PUBLISH_RESULT"
+  ],
+  "states": [
+    {
+      "name": "REGISTER_WSI",
+      "skills": [
+        "register_wsi_reference"
+      ],
+      "bindings": {
+        "jobsConfig": "X2G_Ventures/Digital_Pathology/processing_jobs.json",
+        "wsiBinaryPolicy": "reference_by_path_never_load_into_model_context"
+      }
+    },
+    {
+      "name": "EXTRACT_METADATA",
+      "skills": [
+        "extract_wsi_metadata"
+      ],
+      "bindings": {
+        "metadataOnly": true
+      }
+    },
+    {
+      "name": "QUEUE_ANALYSIS",
+      "skills": [
+        "queue_processing_job"
+      ],
+      "bindings": {
+        "jobsConfig": "X2G_Ventures/Digital_Pathology/processing_jobs.json"
+      }
+    },
+    {
+      "name": "RUN_JOB",
+      "skills": [
+        "run_processing_job"
+      ],
+      "bindings": {
+        "reentryPolicy": "explicit_transition_event_required",
+        "transitionRecording": "append_only_audit"
+      }
+    },
+    {
+      "name": "PUBLISH_RESULT",
+      "skills": [
+        "publish_result"
+      ],
+      "bindings": {
+        "auditTrail": "X2G_infrastructure/logs/audit_trail.json"
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "from": "REGISTER_WSI",
+      "to": "EXTRACT_METADATA",
+      "guard": "wsi_reference_registered"
+    },
+    {
+      "from": "EXTRACT_METADATA",
+      "to": "QUEUE_ANALYSIS",
+      "guard": "metadata_extracted"
+    },
+    {
+      "from": "QUEUE_ANALYSIS",
+      "to": "RUN_JOB",
+      "guard": "job_dispatch_event"
+    },
+    {
+      "from": "RUN_JOB",
+      "to": "PUBLISH_RESULT",
+      "guard": "job_completed"
+    },
+    {
+      "from": "RUN_JOB",
+      "to": "QUEUE_ANALYSIS",
+      "guard": "job_failed_requeue_event"
+    }
+  ],
+  "audit": {
+    "trail": "X2G_infrastructure/logs/audit_trail.json",
+    "mode": "append-only"
+  }
+}
